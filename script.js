@@ -31,7 +31,7 @@ class BST{
         return root;
     }
 
-    prettyPrint(node, prefix = "", isLeft=true){
+    prettyPrint(node = this.root, prefix = "", isLeft=true){
         if(node===null){
             return;
         }
@@ -67,7 +67,7 @@ class BST{
         }
     }
 
-    search(value){
+    find(value){
         let temp = this.root;
         while(temp){
             if(temp.value == value){
@@ -90,38 +90,149 @@ class BST{
         return node;
     }
 
-    // deleteNode(value, root){
-    //     console.log(root);
-    //     if(root===null){
-    //         return root;
-    //     }
-    //     if(value<root.value){
-    //         root.left = this.deleteNode(root.left, value);
-    //     }
-    //     else if(value>root.value){
-    //         root.right = this.deleteNode(root.right, value);
-    //     }
-    //     else{
-    //         if(root.left===null){
-    //             return root.right;
-    //         }
-    //         else if(root.right===null){
-    //             return root.left;
-    //         }
-    //         console.log(root);
-    //         let minNode = this.findMinNode(root.right);
+    deleteItem(value){
+        this.root = this.deleteNode(value, tree.root);
+    }
 
-    //         root.value = minNode.value;
-    //         root.right = this.deleteNode(root.right, minNode.value);
-    //     }
-    //     return root;
-    // }
+    deleteNode(value, root){
+        if(root===null){
+            return root;
+        }
+        if(value<root.value){
+            root.left = this.deleteNode(value, root.left);
+        }
+        else if(value>root.value){
+            root.right = this.deleteNode(value, root.right);
+        }
+        else{
+            
+            if(root.left == null){
+                return root.right;
+            }
+            else if(root.right == null){
+                return root.left;
+            }
+            let minNode = this.findMinNode(root.right);
+            root.value = minNode.value;
+            root.right = this.deleteNode(minNode.value, root.right);
+        }
+        return root;
+    }
+
+    levelOrder(callback, root= this.root){
+        if (typeof callback !== 'function') {
+            throw new Error("A callback function is required.");
+        }
+        if(root===null){
+            return;
+        }
+        let queue = [];
+        queue.push(root);
+        while(queue.length>0){
+            callback(queue[0]);
+            if(queue[0].left!=null){
+                queue.push(queue[0].left);
+            }
+            if(queue[0].right!=null){
+                queue.push(queue[0].right);
+            }
+            queue.shift();
+        }
+    }
+
+    inOrder(callback, root=this.root){
+        if (typeof callback !== 'function') {
+            throw new Error("A callback function is required.");
+        }
+        if(root===null){
+            return;
+        }
+        this.inOrder(callback, root.left);
+        callback(root);
+        this.inOrder(callback, root.right);
+    }
+
+    preOrder(callback, root=this.root){
+        if (typeof callback !== 'function') {
+            throw new Error("A callback function is required.");
+        }
+        if(root===null){
+            return;
+        }
+        callback(root);
+        this.preOrder(callback, root.left);
+        this.preOrder(callback, root.right);
+    }
+
+    postOrder(callback, root=this.root){
+        if (typeof callback !== 'function') {
+            throw new Error("A callback function is required.");
+        }
+        if(root===null){
+            return;
+        }
+        this.postOrder(callback, root.left);
+        this.postOrder(callback, root.right);
+        callback(root);
+    }
+
+    printvalue(node){
+        console.log(node.value);
+    }
+
+    height(root = this.root){
+        if(root === null){
+            return -1;
+        }
+        const leftHeight = this.height(root.left);
+        const rightHeight = this.height(root.right);
+
+        return 1+Math.max(leftHeight, rightHeight);
+    }
+
+    depth(node, root=this.root){
+        if(root===null){
+            return -1;
+        }
+        if(root===node){
+            return 0;
+        }
+        const leftDepth = this.depth(node, root.left);
+        if(leftDepth!==-1){
+            return 1+ leftDepth;
+        }
+        const rightDepth = this.depth(node, root.right);
+        if(rightDepth!==-1){
+            return 1+ rightDepth;
+        }
+        return -1;
+    }
+
+    isBalanced(root = this.root){
+        if(root===null){
+            return true;
+        }
+        const leftDepth = this.height(root.left);
+        const rightDepth = this.height(root.right);
+        if(Math.abs(leftDepth-rightDepth)<=1&&this.isBalanced(root.left)&&this.isBalanced(root.right)){
+            return true;
+        }
+        return false;
+    }
+
+    rebalance(){
+        let array = [];
+        function add(node){
+            array.push(node.value);
+        }
+        this.inOrder(add);
+        this.buildTree(array);
+    }
+
 }
 
 const tree = new BST();
 tree.buildTree([1, 2, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324]);
-tree.insert(6);
-tree.prettyPrint(tree.root);
-
-tree.deleteNode(2, tree.root);
-tree.prettyPrint(tree.root);
+tree.prettyPrint();
+console.log(tree.height());
+console.log(tree);
